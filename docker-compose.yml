@@ -1,0 +1,34 @@
+services:
+  # Spatial Database Service
+  db:
+    image: postgis/postgis:16-3.4
+    container_name: togo_datalab_postgis
+    environment:
+      - POSTGRES_USER=admin
+      - POSTGRES_PASSWORD=password123
+      - POSTGRES_DB=spatial_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./analytical_queries.sql:/scripts/analytical_queries.sql
+    networks:
+      - datalab_net
+
+  # Python Ingestion Service
+  ingest_app:
+    build: .
+    container_name: togo_ingest_app
+    depends_on:
+      - db
+    environment:
+      - DATABASE_URL=postgresql://admin:password123@db:5432/spatial_db
+    networks:
+      - datalab_net
+
+networks:
+  datalab_net:
+    driver: bridge
+
+volumes:
+  postgres_data:
