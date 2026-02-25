@@ -41,14 +41,13 @@ CREATE INDEX idx_regions_geom ON regions USING GIST (geom);
 When writing partitioned Parquet files at this scale (500k rows across multiple dates and categories), a common pitfall is the PyArrow Partition Limit.
 - **Issue**: By default, PyArrow limits the number of partitions to 1024 to protect system resources and file handles.
 - **Solution**: The ingestion script explicitly increases these limits using `max_partitions=2048` and `max_open_files=1024`. This allows the pipeline to handle high-cardinality data (many unique dates and categories) without crashing.
-- **Recommandation**: If the number of unique categories grows significantly, I recommend partitioning only by date and keeping category as a standard column to avoid the "Small File Problem" which degrades read performance.
+- **Recommandation**: If the number of unique categories grows significantly, I recommend partitioning only by date (year/month) and keeping category as a standard column to avoid the "Small File Problem" which degrades read performance.
 
 ## 6. How to run
 The entire environment is containerized to ensure reproducibility across any system, as required for Togo Data Lab's production-oriented standards.
 ### Prerequisites
 - Docker
 - Docker Compose
-
 ### Running the Pipeline
 1. **Start the services**: The following command builds the environment, starts the PostGIS database, and automatically triggers the Python ingestion script (validate_and_partition.py).
 ```bash
