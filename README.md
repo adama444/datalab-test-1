@@ -28,4 +28,36 @@ The SQL in `analytical_queries.sql` addresses three specific business questions:
 - The `events` and `regions` tables are created into PostgreSQL/PostGIS and loaded with cleaned data from part 1
 
 ## 5. Performance Optimization
-To ensure the pipeline remains fast as the dataset grows in a production environment, I recommend to add a Generalized Search Tree (**GIST**) index on the **geom** column for both the `events` and `regions` tables. Why ? Without a GIST index some analytical queries will do a sequential scan, making the query extremely slow on high volume of data.
+To ensure the pipeline remains fast as the dataset grows in a production environment, I recommend to add a Generalized Search Tree (**GIST**) index on the **geom** column for both the `events` and `regions` tables. 
+
+**Why** ? Without a GIST index some analytical queries will do a sequential scan, making the query extremely slow on high volume of data.
+Here is the index creation SQL:
+```sql
+CREATE INDEX idx_events_geom ON events USING GIST (geom);
+CREATE INDEX idx_regions_geom ON regions USING GIST (geom);
+```
+
+## 6. Scalability & Handling Partition Limits
+When writing partitioned Parquet files at this scale (500k rows across multiple dates and categories), a common pitfall is the PyArrow Partition Limit.
+- **Issue**: By default, PyArrow limits the number of partitions to 1024 to protect system resources and file handles.
+- **Solution**: The ingestion script explicitly increases these limits using `max_partitions=2048` and `max_open_files=1024`. This allows the pipeline to handle high-cardinality data (many unique dates and categories) without crashing.
+- **Recommandation**: If the number of unique categories grows significantly, I recommend partitioning only by date and keeping category as a standard column to avoid the "Small File Problem" which degrades read performance.
+
+## 6. How to run
+The entire environment is containerized to ensure reproducibility across any system, as required for Togo Data Lab's production-oriented standards.
+### Prerequisites
+- Docker
+- Docker Compose
+
+### Running the Pipeline
+1. **Start the services**: The following command builds the environment, starts the PostGIS database, and automatically triggers the Python ingestion script (validate_and_partition.py).
+```bash
+docker-compose up --build
+```
+2. **Verify the results**:
+    - **Cleaned Data**: The partitioned Parquet files will be generated in the ./datalake/raw/events/ directory.
+    - **Logs**: Validation errors and "bad records" are logged in ./bad_records.log.
+3. **Execute Spatial Analytics**: Once the data is loaded into the database, you can run the analytical queries. Connect to the PostgreSQL container to execute the SQL script.
+```bash
+docker exec -it togo_datalab_postgis psql -U admin -d spatial_db -f /scripts/analytical_queries.sql
+```
