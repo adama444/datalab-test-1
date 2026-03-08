@@ -53,8 +53,8 @@ To ensure the pipeline remains fast as the dataset grows in a production environ
 **Why** ? Without a GIST index some analytical queries will do a sequential scan, making the query extremely slow on high volume of data.
 Here is the index creation SQL:
 ```sql
-CREATE INDEX idx_events_geom ON events USING GIST (geom);
-CREATE INDEX idx_regions_geom ON regions USING GIST (geom);
+CREATE INDEX idx_events_geom ON datalab.events USING GIST (geom);
+CREATE INDEX idx_regions_geom ON datalab.regions USING GIST (geom);
 ```
 
 ## 7. Scalability & Handling Partition Limits
