@@ -44,7 +44,7 @@ The SQL in `analytical_queries.sql` addresses three specific business questions:
 
 ## 5. Assumptions
 - The **timestamp** column in `events.csv` is in a standard ISO format (e.g., `YYYY-MM-DD HH:MM:SS`)
-- The `events` and `regions` tables are created into PostgreSQL/PostGIS and loaded with cleaned data from part 1
+- The `events` and `regions` tables are created into PostgreSQL/PostGIS and loaded with cleaned data from part 1 into a schema named `datalab`
 - The input CSV always contains the expected columns: `id`, `timestamp`, `latitude`, `longitude`, `value`, `category`, `source`
 
 ## 6. Performance Optimization
