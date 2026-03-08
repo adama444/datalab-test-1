@@ -11,7 +11,7 @@ services:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
-      - ./analytical_queries.sql:/scripts/analytical_queries.sql
+      - ./scripts/analytical_queries.sql:/scripts/analytical_queries.sql
     networks:
       - datalab_net
 
@@ -19,6 +19,7 @@ services:
   ingest_app:
     build: .
     container_name: togo_ingest_app
+    tty: true
     depends_on:
       - db
     environment:

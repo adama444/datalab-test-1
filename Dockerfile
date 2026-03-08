@@ -10,7 +10,6 @@ RUN apt-get update && apt-get install -y \
 WORKDIR /app
 
 # Copy and install Python dependencies
-# requirements.txt should include: pandas, pyarrow, sqlalchemy, psycopg2-binary
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
@@ -18,5 +17,5 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY ingest/validate_and_partition.py ./ingest/
 COPY datalake/raw/ ./datalake/raw/
 
-# Keep the container running or specify the entry point
-CMD ["python", "./ingest/validate_and_partition.py"]
+# Keep the container running
+CMD ["/bin/bash"]
